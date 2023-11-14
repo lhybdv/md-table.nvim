@@ -11,6 +11,27 @@ local function print_log_and_flush()
 	debug = {}
 end
 
+-- in order to align Chinese and English
+-- Chinese character width should be 2
+local function str_len(str)
+  local len, k = 0, 1
+  while (k <= #str) do
+     local c = string.byte(str, k)
+
+     -- simple determin whether it is a Chinese character
+     if c >= 228 and c <= 233 then
+         local c1, c2 = string.byte(str, k+1), string.byte(str, k+2)
+         if c1 >= 128 and c1 <= 191 and c2 >= 128 and c2 <= 191 then
+             len = len + 1
+             k = k + 2
+         end
+     end
+     len = len + 1
+     k = k + 1
+  end
+  return len
+end
+
 local function trim(s)
    return (s:gsub("^%s*(.-)%s*$", "%1"))
 end
@@ -94,8 +115,8 @@ local compute_widths_and_alignments = function (lines)
 			if alignments[i_col] == nil then alignments[i_col] = "left" end
 			local cell = string.sub(lines[i], prev_pos + 1, pos - 1)
 			cell = trim(cell)
-			if string.len(cell) > max_widths[i_col] then
-				max_widths[i_col] = math.max(3, string.len(cell))
+			if str_len(cell) > max_widths[i_col] then
+				max_widths[i_col] = math.max(3, str_len(cell))
 			end
 			prev_pos = pos
 			i_col = i_col + 1
@@ -159,12 +180,12 @@ local function format_row(line, max_widths, alignements)
 			new_line = new_line.."| "
 			local cell = string.sub(line, prev_pos + 1, pos - 1)
 			cell = trim(cell)
-			if string.len(cell) < 3 then cell = cell..string.rep(" ", 3 -string.len(cell)) end
-			local n_spaces = max_widths[i_col] - string.len(cell)
+			if str_len(cell) < 3 then cell = cell..string.rep(" ", 3 -str_len(cell)) end
+			local n_spaces = max_widths[i_col] - str_len(cell)
 			if alignements[i_col] == "centered" then
 				n_spaces = n_spaces / 2
 				new_line = new_line..string.rep(" ", n_spaces)..cell
-				if max_widths[i_col] % 2 ~= string.len(cell) % 2 then
+				if max_widths[i_col] % 2 ~= str_len(cell) % 2 then
 					n_spaces = n_spaces + 1
 				end
 				new_line = new_line..string.rep(" ", n_spaces).." "
