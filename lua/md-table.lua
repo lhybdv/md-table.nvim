@@ -1,3 +1,5 @@
+local M = {}
+
 local debug = {}
 local log = function (text)
 	table.insert(debug, text)
@@ -335,3 +337,14 @@ MarkdownTableColSwap = function ()
 							col_1.." ("..column_title_1..")"}}, false, {})
 
 end
+
+function M.setup()
+  local opts = { force = true }
+  vim.api.nvim_create_user_command("MdTableFormat", MarkdownTableFormat, opts)
+  vim.api.nvim_create_user_command("MdTableColSwap", MarkdownTableColSwap, opts)
+  vim.api.nvim_create_user_command("MdTableColDelete", MarkdownTableColDelete, opts)
+  vim.api.nvim_create_user_command("MdTableColInsert", MarkdownTableColInsert, opts)
+  vim.api.nvim_create_user_command("MdTableColToggleAlign", MarkdownTableColToggleAlign, opts)
+end
+
+return M
